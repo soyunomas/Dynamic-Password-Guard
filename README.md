@@ -133,6 +133,11 @@ No directamente. Como la contraseña requerida cambia constantemente según la h
 
 ## Changelog
 
+### 1.1.1 - 2025-04-27 
+* (Security) Implementado Nonce de WordPress en el guardado de la configuración del perfil de usuario (`dpg_save_user_profile_fields`) para añadir protección contra ataques CSRF (Cross-Site Request Forgery).
+* (Tweak) Añadida comprobación de permisos (`current_user_can`) también en la función que muestra los campos del perfil (`dpg_render_user_profile_fields`) como medida de defensa en profundidad.
+* (Dev) Actualizado número de versión.
+
 ### 1.1.0 - 2025-04-27 
 
 *   (Fix) Corregida la lógica para prevenir el inicio de sesión con solo la contraseña base cuando DPG está activo para un usuario. Ahora solo la contraseña dinámica completa permite el acceso, retornando un error específico si el formato no coincide.

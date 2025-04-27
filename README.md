@@ -104,16 +104,32 @@ No directamente. Como la contraseña requerida cambia constantemente según la h
 
 🔥 **¡ATENCIÓN!** La **Hora del Servidor** ⏰ es la CLAVE. Si está **DESFASADA**, los códigos dinámicos serán **ERRÓNEOS** ❌ y el login **FALLARÁ**. ¡Verifica que esté **SINCRONIZADA**! ✅ (Ej: con NTP).
 
-## Screenshots
+## Capturas de pantalla de funcionamiento
+
+*   **Página de Plugins instalados:** (`plugins` -> `Plugins Instalados`)
+
+    ![Plugins Instalados](images/screenshot.png)
+
+1. Accede a Plugins -> Plugins instalados.
+2. El plugin debe estar activado.
 
 *   **Página de Ajustes Globales:** (`Ajustes` -> `Dynamic Password Guard`)
-    ![Global Settings](images/screenshot-1.png)
+
+    ![Global Settings](images/screenshot1.png)
+    
+1. Una vez tienes activado el plugin, vete a Ajustes.
+2. Busca el elemento del menú llamado Dynamic Password Guard.
+3. Habilita Globalmente la funcionalidad.
+4. Permite que los usuarios configuren sus reglas de perfil.
 
 *   **Sección en el Perfil de Usuario:** (`Usuarios` -> `Perfil`)
-    ![User Profile Section](images/screenshot-2.png)
 
-*   **Formulario de Login Estándar (Sin Cambios Visuales):** (`wp-login.php`)
-    ![Standard Login Form (Unchanged)](images/screenshot-3.png)
+    ![User Profile Section](images/screenshot2.png)
+    
+1. Cada usuario podrá acceder a su perfil.
+2. Elegirá el elemento del menú llamado perfil.
+3. Podrá habilitar la contraseña dinámica.
+4. Configurará las reglas para su contraseña.
 
 ## Changelog
 

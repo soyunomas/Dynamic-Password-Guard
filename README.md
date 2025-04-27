@@ -102,7 +102,7 @@ No directamente. Como la contraseña requerida cambia constantemente según la h
 
 ### ¿Qué importancia tiene la hora del servidor?
 
-¡Es **CRUCIAL**! El plugin se basa en la hora actual del servidor donde está alojado tu WordPress (interpretada según la zona horaria configurada en `Ajustes` -> `Generales` a través de `current_time('timestamp')`). Si la hora del servidor es incorrecta, los valores dinámicos calculados serán incorrectos y no podrás iniciar sesión. Asegúrate de que tu servidor tiene la hora sincronizada correctamente (usando NTP, por ejemplo).
+🔥 **¡ATENCIÓN!** La **Hora del Servidor** ⏰ es la CLAVE. Si está **DESFASADA**, los códigos dinámicos serán **ERRÓNEOS** ❌ y el login **FALLARÁ**. ¡Verifica que esté **SINCRONIZADA**! ✅ (Ej: con NTP).
 
 ## Screenshots
 
@@ -117,13 +117,13 @@ No directamente. Como la contraseña requerida cambia constantemente según la h
 
 ## Changelog
 
-### 1.1.0 - 2025-XX-XX *27/04/2025*
+### 1.1.0 - 2025-04-27 
 
 *   (Fix) Corregida la lógica para prevenir el inicio de sesión con solo la contraseña base cuando DPG está activo para un usuario. Ahora solo la contraseña dinámica completa permite el acceso, retornando un error específico si el formato no coincide.
 *   (Tweak) Ajustada la prioridad del filtro `authenticate` a 10 para asegurar que se ejecuta antes que las validaciones estándar de WP y controlar el flujo de autenticación.
 *   (Dev) Limpieza de código y eliminación de logs de depuración. Versión lista para uso inicial.
 
-### 1.0.0 - *26/04/2025*
+### 1.0.0 - 2025-04-25
 
 *   Versión inicial del plugin. Funcionalidad MVP.
 

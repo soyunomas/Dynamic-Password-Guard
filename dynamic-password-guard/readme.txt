@@ -4,7 +4,7 @@ Donate link:
 Tags: security, login, password, authentication, dynamic password, time-based, brute force, hardening, seguridad, contraseña, autenticación, contraseña dinámica
 Requires at least: 5.2
 Tested up to: 6.5  # Actualiza esto a la última versión de WP con la que lo has probado
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 Requires PHP: 7.4
 License: GPL v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -107,6 +107,11 @@ No directamente. Como la contraseña requerida cambia constantemente según la h
 3.  **Formulario de Login:** Destaca que el formulario de `wp-login.php` no cambia visualmente.
 
 == Changelog ==
+
+= 1.1.1 =
+* (Security) Implementado Nonce de WordPress en el guardado de la configuración del perfil de usuario (`dpg_save_user_profile_fields`) para añadir protección contra ataques CSRF (Cross-Site Request Forgery).
+* (Tweak) Añadida comprobación de permisos (`current_user_can`) también en la función que muestra los campos del perfil (`dpg_render_user_profile_fields`) como medida de defensa en profundidad.
+* (Dev) Actualizado número de versión.
 
 = 1.1.0 =
 * (Fix) Corregida la lógica para prevenir el inicio de sesión con solo la contraseña base cuando DPG está activo para un usuario. Ahora solo la contraseña dinámica completa permite el acceso.

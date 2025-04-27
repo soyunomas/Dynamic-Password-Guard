@@ -3,11 +3,11 @@
  * Plugin Name:       Dynamic Password Guard
  * Plugin URI:        https://github.com/soyunomas/Dynamic-Password-Guard
  * Description:       Aumenta la seguridad del inicio de sesión requiriendo una contraseña base combinada con datos dinámicos basados en el tiempo.
- * Version:           1.1.0
+ * Version:           1.1.1
  * Requires at least: 5.2
  * Requires PHP:      7.4
- * Author:            soyunomas
- * Author URI:        https://github.com/soyunomas/Dynamic-Password-Guard
+ * Author:            (Tu Nombre o Nombre de Empresa)
+ * Author URI:        (Tu URL)
  * License:           GPL v2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       dynamic-password-guard
@@ -18,7 +18,8 @@
 defined( 'ABSPATH' ) or die( '¡Acceso no autorizado!' );
 
 // --- Define plugin constants ---
-define( 'DPG_VERSION', '1.1.0' );
+// Sugerencia: Actualizar versión si haces release con estos cambios
+define( 'DPG_VERSION', '1.1.1' );
 define( 'DPG_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPG_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'DPG_PLUGIN_FILE', __FILE__ );
@@ -164,7 +165,8 @@ function dpg_render_settings_page() {
  * @return array Associative array of [value => label].
  */
 function dpg_get_time_variable_options() {
-    return [
+    // El contenido de esta función no cambia
+     return [
         'none'          => __( 'Ninguna', 'dynamic-password-guard' ),
         'hour_hh'       => __( 'Hora (00-23)', 'dynamic-password-guard' ),
         'minute_mm'     => __( 'Minuto (00-59)', 'dynamic-password-guard' ),
@@ -177,10 +179,12 @@ function dpg_get_time_variable_options() {
 
 /**
  * Displays the DPG configuration fields on the user profile page.
+ * ***** MODIFICADA para añadir el campo nonce *****
  * @param WP_User $user The user object whose profile is being displayed.
  */
 function dpg_render_user_profile_fields( $user ) {
     if ( ! get_option( DPG_ALLOW_USER_CONFIG_OPTION, 0 ) ) return;
+    // Verificación explícita si el usuario actual puede editar al usuario mostrado
     if ( ! current_user_can( 'edit_user', $user->ID ) ) return;
 
     $user_enabled = get_user_meta( $user->ID, DPG_USER_ENABLED_META, true );
@@ -227,6 +231,13 @@ function dpg_render_user_profile_fields( $user ) {
                  <p class="description"><?php esc_html_e( 'Se añadirá DESPUÉS de tu contraseña base.', 'dynamic-password-guard' ); ?></p>
             </td>
         </tr>
+        <?php
+        // *** NUEVO: Añadir campo Nonce para seguridad ***
+        // Se coloca dentro de la tabla para asegurar que se envíe con el formulario
+        ?>
+        <tr>
+            <td colspan="2"><?php wp_nonce_field( 'dpg_save_user_profile_' . $user->ID, 'dpg_profile_nonce' ); ?></td>
+        </tr>
     </table>
     <?php
 }
@@ -235,12 +246,25 @@ add_action( 'edit_user_profile', 'dpg_render_user_profile_fields', 10, 1 );
 
 /**
  * Saves the DPG configuration fields from the user profile page.
+ * ***** MODIFICADA para verificar el nonce *****
  * @param int $user_id The ID of the user being updated.
  */
 function dpg_save_user_profile_fields( $user_id ) {
+    // 1. Comprobaciones iniciales (Mantener)
     if ( ! get_option( DPG_ALLOW_USER_CONFIG_OPTION, 0 ) ) return;
-    if ( ! current_user_can( 'edit_user', $user_id ) ) return;
+    // Verificación explícita de permisos
+    if ( ! current_user_can( 'edit_user', $user_id ) ) {
+         return; // Salir si no tiene permisos
+    }
 
+    // 2. *** NUEVO: Verificar el Nonce ***
+    // Comprueba si el campo nonce fue enviado y si es válido para la acción esperada.
+    if ( ! isset( $_POST['dpg_profile_nonce'] ) || ! wp_verify_nonce( sanitize_key($_POST['dpg_profile_nonce']), 'dpg_save_user_profile_' . $user_id ) ) {
+       // Si el nonce no está o no es válido, muestra un error y detiene la ejecución.
+       wp_die( __( 'Error de seguridad al guardar la configuración de Dynamic Password Guard. Por favor, inténtalo de nuevo.', 'dynamic-password-guard' ), __( 'Error de Seguridad', 'dynamic-password-guard' ), array( 'response' => 403 ) );
+    }
+
+    // 3. El resto del código para guardar los datos (Mantener)
     // Save Enabled State
     $user_enabled = isset( $_POST[ DPG_USER_ENABLED_META ] ) && $_POST[ DPG_USER_ENABLED_META ] == '1' ? 1 : 0;
     update_user_meta( $user_id, DPG_USER_ENABLED_META, $user_enabled );
@@ -349,6 +373,7 @@ function dpg_authenticate_user( $user, $username, $password ) {
 
     // 6. If both keys are 'none', DPG is enabled but inactive for this user. Use standard auth.
     if ( 'none' === $pre_key_type && 'none' === $post_key_type ) {
+        // Aunque esté 'activo', si no hay claves, funciona como desactivado para este login.
         return $user; // $user is null here.
     }
 
@@ -417,14 +442,12 @@ function dpg_authenticate_user( $user, $username, $password ) {
         // remove_filter( 'authenticate', 'wp_authenticate_application_password', 20 );
 
         // Now return a WP_Error. This halts the 'authenticate' filter chain for this attempt
-        // and signals WordPress to show an error.
+        // and signals WordPress to show an error. We use the custom error message defined earlier.
         return new WP_Error('incorrect_password', __('<strong>ERROR</strong>: La contraseña introducida no tiene el formato dinámico correcto o la contraseña base es incorrecta.', 'dynamic-password-guard'));
     }
 
 } // End of dpg_authenticate_user function
 
-// Hook our function into 'authenticate' with **PRIORITY 10**.
-// This is crucial to run *before* standard username/password checks (priority 20)
-// and *before* or *after* the cookie check (priority 10 or 30 depending on WP version/state)
-// but allows us to control the flow if DPG is active for the user.
+// Hook our function into 'authenticate' with PRIORITY 10.
 add_filter( 'authenticate', 'dpg_authenticate_user', 10, 3 );
+

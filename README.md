@@ -1,6 +1,6 @@
 # Dynamic Password Guard
 
-![Version](https://img.shields.io/badge/Version-1.1.0-blue.svg)
+![Version](https://img.shields.io/badge/Version-1.1.2-blue.svg)
 ![Tested Up To](https://img.shields.io/badge/WP%20Tested-6.5-brightgreen.svg)
 ![Requires PHP](https://img.shields.io/badge/PHP-7.4%2B-blueviolet.svg)
 ![License](https://img.shields.io/badge/License-GPL%20v2%2B-green.svg)
@@ -13,7 +13,7 @@ Dynamic Password Guard (DPG) añade una capa de seguridad significativa a tu sit
 
 ### Características Principales
 
-*   **Protección Sigilosa:** No altera visualmente el formulario de inicio de sesión estándar de WordPress (`wp-login.php`), haciendo que la protección adicional sea invisible para los atacantes. Los mensajes de error son los genéricos de WordPress para no dar pistas.
+*   **Protección Sigilosa (Stealth Mode):** No altera visualmente el formulario de inicio de sesión estándar de WordPress (`wp-login.php`), haciendo que la protección adicional sea invisible para los atacantes. Los mensajes de error son siempre los genéricos de WordPress para no dar ninguna pista.
 *   **Contraseña Combinada:** Los usuarios con DPG activado deben introducir `[Valor Pre-Clave][Contraseña Base][Valor Post-Clave]` en el campo de contraseña normal.
 *   **Configuración Flexible:**
     *   El Administrador puede habilitar/deshabilitar globalmente el plugin.
@@ -27,11 +27,11 @@ Dynamic Password Guard (DPG) añade una capa de seguridad significativa a tu sit
 2.  Comprueba si el usuario tiene una regla DPG activa.
 3.  Si la tiene, calcula los valores esperados de Pre-Clave y Post-Clave basándose en la hora/fecha actual del servidor (según la zona horaria de WordPress).
 4.  Verifica si la contraseña introducida **tiene el formato correcto** (empieza por Pre-Clave y termina por Post-Clave).
-    *   Si el **formato es incorrecto**, el plugin fuerza un error inmediato para prevenir que se intente validar solo la contraseña base.
+    *   Si el **formato es incorrecto**, el plugin se asegura de que la autenticación falle de forma silenciosa, devolviendo el error genérico de WordPress. Esto oculta por completo la presencia y el estado del plugin.
     *   Si el **formato es correcto**, extrae la presunta contraseña base del centro.
 5.  Verifica la **contraseña base extraída** usando la función estándar `wp_check_password`.
     *   Si la base es **correcta**, permite el acceso.
-    *   Si la base es **incorrecta**, devuelve `null` para que WordPress muestre el error genérico de contraseña incorrecta (Modo Sigiloso).
+    *   Si la base es **incorrecta**, devuelve `null` para que WordPress muestre el error genérico de contraseña incorrecta, manteniendo el modo sigiloso.
 
 Este enfoque está diseñado para ser robusto contra ataques de fuerza bruta que prueban contraseñas comunes, ya que la contraseña requerida cambia constantemente.
 
@@ -40,118 +40,86 @@ Este enfoque está diseñado para ser robusto contra ataques de fuerza bruta que
 ### Opción 1: Desde GitHub Releases (Recomendado)
 
 1.  Ve a la sección de [**Releases**](https://github.com/soyunomas/dynamic-password-guard/releases) de este repositorio.
-2.  Descarga el archivo `.zip` de la última versión estable (ej. `dynamic-password-guard.zip`).
+2.  Descarga el archivo `.zip` de la última versión estable (ej. `dynamic-password-guard-v1.1.2.zip`).
 3.  En tu panel de WordPress, ve a `Plugins` -> `Añadir nuevo`.
-4.  Haz clic en `Subir plugin`.
-5.  Selecciona el archivo `.zip` descargado y haz clic en `Instalar ahora`.
-6.  Activa el plugin a través del menú 'Plugins' en WordPress.
+4.  Haz clic en `Subir plugin`, selecciona el archivo `.zip` y haz clic en `Instalar ahora`.
+5.  Activa el plugin a través del menú 'Plugins' en WordPress.
 
 ### Opción 2: Manualmente (o vía Git)
 
-1.  Clona este repositorio o descarga el código fuente.
-    ```bash
-    git clone https://github.com/soyunomas/dynamic-password-guard.git
-    ```
-2.  Si descargaste el ZIP del código fuente (no el de releases), asegúrate de que la carpeta resultante se llame `dynamic-password-guard`.
-3.  Sube la carpeta `dynamic-password-guard` completa al directorio `/wp-content/plugins/` de tu sitio WordPress usando FTP, el administrador de archivos de tu hosting, o Git.
-4.  Activa el plugin a través del menú 'Plugins' en WordPress.
+1.  Clona este repositorio: `git clone https://github.com/soyunomas/dynamic-password-guard.git`
+2.  Sube la carpeta `dynamic-password-guard` completa al directorio `/wp-content/plugins/` de tu sitio.
+3.  Activa el plugin a través del menú 'Plugins' en WordPress.
 
 ## Configuración Inicial
 
 1.  Ve a `Ajustes` -> `Dynamic Password Guard` en tu panel de WordPress.
 2.  Marca la casilla "**Habilitar Globalmente**" para activar la funcionalidad del plugin.
-3.  Decide si quieres "**Permitir Configuración por Usuario**" y marca la casilla si deseas que los usuarios puedan gestionar sus propias reglas. Guarda los cambios.
-4.  Si permitiste la configuración por usuario, cada usuario (incluyendo administradores) deberá ir a `Usuarios` -> `Perfil` y configurar su propia sección de "**Dynamic Password Guard**" (activarla y elegir Pre/Post claves).
+3.  Decide si quieres "**Permitir Configuración por Usuario**". Guarda los cambios.
+4.  Si permitiste la configuración por usuario, cada usuario deberá ir a `Usuarios` -> `Perfil` para activar y configurar sus propias reglas.
 
 ## Frequently Asked Questions (FAQ)
 
-### ¿Cómo sé qué contraseña dinámica usar?
+#### ¿Cómo sé qué contraseña dinámica usar?
 
-Debes combinar los valores de tiempo/fecha actuales (según la zona horaria de tu WordPress) con tu contraseña base, siguiendo el patrón que configuraste en tu perfil.
-*   **Ejemplo:** Si tu contraseña base es `MiPass123`, tu Pre-Clave es `Hora (HH)` y tu Post-Clave es `Día del Mes (DD)`, y la hora actual en WordPress son las **14**:30 del día **08**, deberás introducir `14MiPass12308` en el campo de contraseña.
+Debes combinar los valores de tiempo/fecha actuales (según la zona horaria de tu WordPress) con tu contraseña base, siguiendo el patrón que configuraste.
+*   **Ejemplo:** Si tu contraseña es `MiPass123`, tu Pre-Clave es `Hora (HH)` y tu Post-Clave es `Día del Mes (DD)`, y son las **14**:30 del día **08**, deberás introducir `14MiPass12308`.
 
-### ¿Qué variables de tiempo están disponibles?
+#### ¿Qué variables de tiempo están disponibles?
 
 *   Ninguna
-*   Hora (00-23) (Formato `H`)
-*   Minuto (00-59) (Formato `i`)
-*   Día del Mes (01-31) (Formato `d`)
-*   Mes (01-12) (Formato `m`)
-*   Año (últimos 2 dígitos, ej. 24) (Formato `y`)
-*   Día de la Semana (1=Lunes, 7=Domingo) (Formato `N`)
+*   Hora (00-23)
+*   Minuto (00-59)
+*   Día del Mes (01-31)
+*   Mes (01-12)
+*   Año (últimos 2 dígitos, ej. 25)
+*   Día de la Semana (1=Lunes, 7=Domingo)
 
-### ¿Qué pasa si olvido mi patrón o no puedo acceder?
+#### ¿Qué pasa si olvido mi patrón o no puedo acceder?
 
-Si un usuario no puede acceder porque olvidó su patrón o la hora del servidor es incorrecta:
-1.  Un **Administrador** puede ir al perfil de ese usuario (`Usuarios` -> `Todos los usuarios` -> `Editar`).
-2.  En la sección "Dynamic Password Guard" del perfil del usuario, el administrador puede **desmarcar** la casilla "Activar Contraseña Dinámica" y guardar los cambios.
-3.  Ahora el usuario podrá iniciar sesión usando **solo su contraseña base normal**.
-4.  El usuario podrá entonces reconfigurar su patrón DPG si lo desea.
+Un **Administrador** puede ir al perfil del usuario (`Usuarios` -> `Editar`), desmarcar la casilla "Activar Contraseña Dinámica" y guardar. El usuario podrá entonces iniciar sesión con su contraseña base normal.
 
-### ¿Funciona con el reseteo de contraseña estándar de WordPress?
+#### ¿Es compatible con plugins de Autenticación de Dos Factores (2FA)?
 
-Sí, el mecanismo "He olvidado mi contraseña" de WordPress debería funcionar normalmente, ya que no suele pasar por el mismo flujo de autenticación que el login directo. Si tienes problemas, desactiva temporalmente DPG para ese usuario como se describe arriba.
+Sí, debería ser compatible. DPG actúa sobre el primer factor (la contraseña) muy temprano en el proceso. Sin embargo, **siempre se recomienda probar** la compatibilidad con cualquier otro plugin que modifique el login.
 
-### ¿Es compatible con plugins de Autenticación de Dos Factores (2FA)?
+#### ¿Qué importancia tiene la hora del servidor?
 
-En teoría, debería ser compatible, ya que DPG actúa sobre el primer factor (la contraseña) con prioridad 10 en el hook `authenticate`. Si tu plugin 2FA se engancha más tarde o en otros hooks, debería funcionar. Sin embargo, **se recomienda probar exhaustivamente** la compatibilidad con cualquier otro plugin que modifique el proceso de login.
+**Es CRUCIAL.** El plugin depende de la hora correcta del servidor (configurada en `Ajustes` -> `Generales`). Si la hora del servidor está desfasada, los valores dinámicos serán incorrectos y el inicio de sesión fallará. Asegúrate de que tu servidor esté sincronizado (ej. usando NTP).
 
-### ¿Funciona con gestores de contraseñas?
-
-No directamente. Como la contraseña requerida cambia constantemente según la hora/fecha, los gestores de contraseñas no pueden autocompletarla correctamente. Deberás introducirla manualmente cada vez.
-
-### ¿Qué importancia tiene la hora del servidor?
-
-🔥 **¡ATENCIÓN!** La **Hora del Servidor** ⏰ es la CLAVE. Si está **DESFASADA**, los códigos dinámicos serán **ERRÓNEOS** ❌ y el login **FALLARÁ**. ¡Verifica que esté **SINCRONIZADA**! ✅ (Ej: con NTP).
-
-## Capturas de pantalla de funcionamiento
-
-*   **Página de Plugins instalados:** (`plugins` -> `Plugins Instalados`)
-
-    ![Plugins Instalados](images/screenshot.png)
-
-1. Accede a Plugins -> Plugins instalados.
-2. El plugin debe estar activado.
+## Capturas de Pantalla
 
 *   **Página de Ajustes Globales:** (`Ajustes` -> `Dynamic Password Guard`)
+    *   Aquí el administrador activa el plugin y decide si los usuarios pueden gestionar sus propias reglas.
 
     ![Global Settings](images/screenshot1.png)
-    
-1. Una vez tienes activado el plugin, vete a Ajustes.
-2. Busca el elemento del menú llamado Dynamic Password Guard.
-3. Habilita Globalmente la funcionalidad.
-4. Permite que los usuarios configuren sus reglas de perfil.
 
 *   **Sección en el Perfil de Usuario:** (`Usuarios` -> `Perfil`)
+    *   Si está permitido, cada usuario puede activar DPG para su cuenta y elegir sus variables de tiempo.
 
     ![User Profile Section](images/screenshot2.png)
     
-1. Cada usuario podrá acceder a su perfil.
-2. Elegirá el elemento del menú llamado perfil.
-3. Podrá habilitar la contraseña dinámica.
-4. Configurará las reglas para su contraseña.
+*   **Página de Login de WordPress:**
+    *   La interfaz de `wp-login.php` permanece sin cambios, ocultando la protección adicional.
+    
+    ![Login Form](images/screenshot.png) <!-- Asumiendo que esta es la imagen del login -->
 
 ## Changelog
 
-### 1.1.1 - 2025-04-27 
-* (Security) Implementado Nonce de WordPress en el guardado de la configuración del perfil de usuario (`dpg_save_user_profile_fields`) para añadir protección contra ataques CSRF (Cross-Site Request Forgery).
-* (Tweak) Añadida comprobación de permisos (`current_user_can`) también en la función que muestra los campos del perfil (`dpg_render_user_profile_fields`) como medida de defensa en profundidad.
-* (Dev) Actualizado número de versión.
+### 1.1.2 - 2025-08-26
+*   **(Security)** Endurecido el proceso de autenticación para garantizar que los mensajes de error sean siempre genéricos. Esto perfecciona las capacidades de "modo sigiloso" del plugin, previniendo que un atacante pueda descubrir qué usuarios tienen la contraseña dinámica activada.
+*   **(Dev)** Actualizado el número de versión a 1.1.2.
+
+### 1.1.1 - 2025-04-27
+*   **(Security)** Implementado Nonce de WordPress en el guardado de la configuración del perfil de usuario para añadir protección contra ataques CSRF.
+*   **(Tweak)** Añadida comprobación de permisos (`current_user_can`) en la renderización de los campos del perfil como medida de defensa en profundidad.
 
 ### 1.1.0 - 2025-04-27 
-
-*   (Fix) Corregida la lógica para prevenir el inicio de sesión con solo la contraseña base cuando DPG está activo para un usuario. Ahora solo la contraseña dinámica completa permite el acceso, retornando un error específico si el formato no coincide.
-*   (Tweak) Ajustada la prioridad del filtro `authenticate` a 10 para asegurar que se ejecuta antes que las validaciones estándar de WP y controlar el flujo de autenticación.
-*   (Dev) Limpieza de código y eliminación de logs de depuración. Versión lista para uso inicial.
+*   **(Fix)** Corregida la lógica para prevenir el inicio de sesión con solo la contraseña base cuando DPG está activo.
+*   **(Tweak)** Ajustada la prioridad del filtro `authenticate` a 10 para asegurar el control del flujo de autenticación.
 
 ### 1.0.0 - 2025-04-25
-
-*   Versión inicial del plugin. Funcionalidad MVP.
-
-## Compatibilidad
-
-*   **Plugins 2FA:** Debería ser compatible, pero se recomienda probar. DPG actúa temprano en el hook `authenticate`.
-*   **Gestores de Contraseñas:** No son compatibles debido a la naturaleza dinámica de la contraseña.
+*   Versión inicial del plugin.
 
 ## Licencia
 

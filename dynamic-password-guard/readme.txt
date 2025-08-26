@@ -3,8 +3,8 @@ Contributors: soyunomas
 Donate link:
 Tags: security, login, password, authentication, dynamic password, time-based, brute force, hardening, seguridad, contraseña, autenticación, contraseña dinámica
 Requires at least: 5.2
-Tested up to: 6.5  # Actualiza esto a la última versión de WP con la que lo has probado
-Stable tag: 1.1.1
+Tested up to: 6.5
+Stable tag: 1.1.2
 Requires PHP: 7.4
 License: GPL v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -106,7 +106,12 @@ No directamente. Como la contraseña requerida cambia constantemente según la h
 2.  **Sección en el Perfil de Usuario:** Muestra los campos que ve el usuario (si está permitido) en su página de `Usuarios` -> `Perfil`.
 3.  **Formulario de Login:** Destaca que el formulario de `wp-login.php` no cambia visualmente.
 
+
 == Changelog ==
+
+= 1.1.2 =
+* (Security) Hardened the authentication process by ensuring login error messages are always generic. This enhances the plugin's stealth capabilities, preventing attackers from identifying which users have dynamic passwords enabled.
+* (Dev) Updated plugin version to 1.1.2.
 
 = 1.1.1 =
 * (Security) Implementado Nonce de WordPress en el guardado de la configuración del perfil de usuario (`dpg_save_user_profile_fields`) para añadir protección contra ataques CSRF (Cross-Site Request Forgery).

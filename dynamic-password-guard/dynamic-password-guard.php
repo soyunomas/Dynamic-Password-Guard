@@ -3,7 +3,7 @@
  * Plugin Name:       Dynamic Password Guard
  * Plugin URI:        https://github.com/soyunomas/Dynamic-Password-Guard
  * Description:       Aumenta la seguridad del inicio de sesión requiriendo una contraseña base combinada con datos dinámicos basados en el tiempo.
- * Version:           1.1.1
+ * Version:           1.1.2
  * Requires at least: 5.2
  * Requires PHP:      7.4
  * Author:            (Tu Nombre o Nombre de Empresa)
@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) or die( '¡Acceso no autorizado!' );
 
 // --- Define plugin constants ---
 // Sugerencia: Actualizar versión si haces release con estos cambios
-define( 'DPG_VERSION', '1.1.1' );
+define( 'DPG_VERSION', '1.1.2' );
 define( 'DPG_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPG_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'DPG_PLUGIN_FILE', __FILE__ );
@@ -429,21 +429,16 @@ function dpg_authenticate_user( $user, $username, $password ) {
             // resulting in the generic "Incorrect password" error without revealing DPG.
             return null;
         }
-    } else {
-        // Format does NOT match the expected dynamic format (e.g., user submitted only base password).
-        // FORCE FAILURE NOW: We must prevent standard WP auth filters (priority 20+)
-        // from potentially validating the submitted password if it happens to be the base password.
-        // We achieve this by removing those standard filters *before* returning an error.
-        // This ensures only the DPG format works when DPG is active.
-
+     } else {
+        // The goal is to fail, but let WordPress generate the generic error.
+        // Returning null would normally pass control, but we need to ensure the base password alone isn't checked.
+        // The current remove_filter approach is excellent, but let's pair it with a silent failure.
         remove_filter( 'authenticate', 'wp_authenticate_username_password',    20 );
         remove_filter( 'authenticate', 'wp_authenticate_email_password',       20 );
-        // Optional: remove application password check too for completeness
-        // remove_filter( 'authenticate', 'wp_authenticate_application_password', 20 );
 
-        // Now return a WP_Error. This halts the 'authenticate' filter chain for this attempt
-        // and signals WordPress to show an error. We use the custom error message defined earlier.
-        return new WP_Error('incorrect_password', __('<strong>ERROR</strong>: La contraseña introducida no tiene el formato dinámico correcto o la contraseña base es incorrecta.', 'dynamic-password-guard'));
+        // Returning null AFTER removing the standard checks will cause the authentication chain to end
+        // without a valid user object, resulting in the default WordPress error message.
+        return null;
     }
 
 } // End of dpg_authenticate_user function
